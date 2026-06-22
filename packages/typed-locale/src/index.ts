@@ -1,7 +1,7 @@
 export type {DeferredTranslationPayload} from './deferred-translation';
-export type {InferPartialTranslation, InferTranslation} from './infer';
+export type {InferPartialTranslation, InferTranslation, TranslationVariable, TranslationVariables} from './infer';
 export type {OptionsGenerator, TranslationOption} from './options';
-export type {Translator} from './translator';
+export type {Translator, TranslatorOptions} from './translator';
 
 export {createDeferredTranslator, createOptionDeferrer, isDeferredTranslation} from './deferred-translation';
 export {createLazyTranslator} from './lazy-translator';

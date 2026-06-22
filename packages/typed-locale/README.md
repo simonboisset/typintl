@@ -154,6 +154,31 @@ const text = translator(t => t.helloName({name: 'World'}));
 console.log(text); // 'Hello, World!'
 ```
 
+### Default variables
+
+Use `defaultVariables` when some interpolation values come from app-level context and should not be passed at
+every call site.
+
+```typescript
+export const en = {
+  welcome: 'Welcome to {{appName}}',
+  hello: 'Hello {{name}} from {{appName}}',
+} as const;
+
+const translator = createTranslator(en, {
+  defaultVariables: {
+    appName: 'Acme App',
+  },
+});
+
+translator(t => t.welcome); // 'Welcome to Acme App'
+translator(t => t.hello({name: 'Simon'})); // 'Hello Simon from Acme App'
+translator(t => t.hello({name: 'Simon', appName: 'Custom App'})); // 'Hello Simon from Custom App'
+```
+
+Default variables also work with `createTranslatorFromDictionary` and deferred translations. Phrase-level variables
+override defaults.
+
 ## Default translation
 
 If you have some translations that are not ready for all languages, you can use InferPartialTranslation type to define the other translations.
@@ -750,22 +775,29 @@ const frenchErrors = validateForm(formData, deferredTranslatorFr);
 
 ### Core Functions
 
-#### `createTranslator(translations)`
+#### `createTranslator(translations, options?)`
 Creates a translator function from a single translation object.
 
 ```typescript
-const translator = createTranslator(translations);
+const translator = createTranslator(translations, {
+  defaultVariables: {
+    appName: 'Acme App',
+  },
+});
 const result = translator(t => t.hello);
 ```
 
-#### `createTranslatorFromDictionary({dictionary, locale, defaultLocale})`
+#### `createTranslatorFromDictionary({dictionary, locale, defaultLocale, defaultVariables?})`
 Creates a translator function from a dictionary of translations with fallback support.
 
 ```typescript
 const translator = createTranslatorFromDictionary({
   dictionary: {en, fr}, 
   locale: 'fr',
-  defaultLocale: 'en'
+  defaultLocale: 'en',
+  defaultVariables: {
+    appName: 'Acme App',
+  },
 });
 ```
 

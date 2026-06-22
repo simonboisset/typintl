@@ -1,4 +1,4 @@
-import {type InferTranslationGenerator} from './infer';
+import {type InferTranslationGenerator, type InferTranslationVariables} from './infer';
 import {type TranslationOption} from './options';
 import {Translator} from './translator';
 
@@ -19,9 +19,15 @@ const decodePayload = (token: string): DeferredTranslationPayload => {
   return JSON.parse(json);
 };
 
-export type RecordingGenerator<Translation extends Record<string, unknown>> = InferTranslationGenerator<Translation>;
+export type RecordingGenerator<
+  Translation extends Record<string, unknown>,
+  DefaultVariables extends object = {},
+> = InferTranslationGenerator<Translation, DefaultVariables>;
 
-const createRecordingGenerator = <Translation extends Record<string, unknown>>(): RecordingGenerator<Translation> => {
+const createRecordingGenerator = <
+  Translation extends Record<string, unknown>,
+  DefaultVariables extends object = {},
+>(): RecordingGenerator<Translation, DefaultVariables> => {
   const makeNode = (path: (string | number)[]): any => {
     const handler: ProxyHandler<any> = {
       get(_target, prop) {
@@ -45,13 +51,16 @@ const createRecordingGenerator = <Translation extends Record<string, unknown>>()
     });
     return new Proxy(fn, handler);
   };
-  return makeNode([]) as RecordingGenerator<Translation>;
+  return makeNode([]) as RecordingGenerator<Translation, DefaultVariables>;
 };
 
 export const createOptionDeferrer =
-  <Translation extends Record<string, unknown>>() =>
-  (option: TranslationOption<Translation>): string => {
-    const recorder = createRecordingGenerator<Translation>();
+  <
+    Translation extends Record<string, unknown>,
+    DefaultVariables extends Partial<InferTranslationVariables<Translation>> = {},
+  >() =>
+  (option: TranslationOption<Translation, DefaultVariables>): string => {
+    const recorder = createRecordingGenerator<Translation, DefaultVariables>();
     const result = option(recorder);
     if (typeof result === 'string') return result;
     if (typeof result === 'function') return (result as any)();
@@ -60,7 +69,7 @@ export const createOptionDeferrer =
 
 export const isDeferredTranslation = (message: string): boolean => message.startsWith(TOKEN_PREFIX);
 
-const toDeferredTranslationOption = (payload: DeferredTranslationPayload): TranslationOption<any> => {
+const toDeferredTranslationOption = (payload: DeferredTranslationPayload): TranslationOption<any, any> => {
   return generator => {
     if (payload.path.length === 0) {
       return '';
@@ -75,8 +84,11 @@ const toDeferredTranslationOption = (payload: DeferredTranslationPayload): Trans
   };
 };
 
-export const createDeferredTranslator = <Translation extends Record<string, unknown>>(
-  translator: Translator<Translation>,
+export const createDeferredTranslator = <
+  Translation extends Record<string, unknown>,
+  DefaultVariables extends object = {},
+>(
+  translator: Translator<Translation, DefaultVariables>,
 ) => {
   return (token: string) => {
     const payload = decodePayload(token);

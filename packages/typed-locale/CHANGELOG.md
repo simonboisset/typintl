@@ -1,5 +1,11 @@
 # typed-locale
 
+## 0.5.4
+
+### Patch Changes
+
+- Add translator-level default variables for interpolation with type-safe phrase-level overrides.
+
 ## 0.5.3
 
 ### Patch Changes

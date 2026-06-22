@@ -1,6 +1,6 @@
 {
   "name": "typed-locale",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Type safe internationalization library",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
